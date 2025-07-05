@@ -1,6 +1,4 @@
 # arduino-led-buttons
-This project controls LEDs using push buttons on Arduino UNO.
-
 A simple interactive Arduino UNO project to control 3 LEDs (Blue, Red, Yellow) using 3 push buttons.  
 Each button is wired to either turn ON or OFF a specific LED.
 
@@ -10,10 +8,10 @@ Each button is wired to either turn ON or OFF a specific LED.
 
 Below are screenshots of the project simulation in Tinkercad:
 
-# 🔴 All LEDs OFF
+# All LEDs OFF
 ![OFF](OFF.png)
 
-# 🟢 LEDs ON After Button Press
+# LEDs ON After Button Press
 ![ON](ON.png)
 
 ---
@@ -40,19 +38,30 @@ Click "**Start Simulation**" to see how the buttons control each LED.
 
 # Arduino Code Example
 
-This example turns a single LED (connected to pin 9) ON and OFF with delay.
-For the full button logic, refer to the `led_control.ino` file.
+This example shows the full logic to toggle 3 LEDs using 3 push buttons:
 
 ```cpp
-const int blueLed = 9;
+const int buttonPins[] = {2, 3, 4};
+const int ledPins[] = {9, 10, 11};
+bool ledStates[] = {false, false, false};
+bool lastButtonStates[] = {HIGH, HIGH, HIGH};
 
 void setup() {
-  pinMode(blueLed, OUTPUT);
+  for (int i = 0; i < 3; i++) {
+    pinMode(buttonPins[i], INPUT);
+    digitalWrite(buttonPins[i], HIGH); // enable internal pull-up
+    pinMode(ledPins[i], OUTPUT);
+  }
 }
 
 void loop() {
-  digitalWrite(blueLed, HIGH);
-  delay(500);
-  digitalWrite(blueLed, LOW);
-  delay(500);
+  for (int i = 0; i < 3; i++) {
+    bool currentButton = digitalRead(buttonPins[i]);
+    if (currentButton == LOW && lastButtonStates[i] == HIGH) {
+      ledStates[i] = !ledStates[i];
+      digitalWrite(ledPins[i], ledStates[i]);
+      delay(10); // simple debounce
+    }
+    lastButtonStates[i] = currentButton;
+  }
 }
